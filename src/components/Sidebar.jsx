@@ -47,8 +47,6 @@ export default function Sidebar() {
       <DraggableBlock block={{ id: 'SAY_FOR_SECS', label: 'Say __ for __ secs', values: ['Hello!', 2] }} />
       <DraggableBlock block={{ id: 'THINK_FOR_SECS', label: 'Think __ for __ secs', values: ['Hmm...', 2] }} />
       
-      <div className="font-bold mt-6 mb-4">Controls</div>
-      
     </div>
   );
 }
