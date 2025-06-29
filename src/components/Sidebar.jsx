@@ -4,7 +4,7 @@ import { useDrag } from 'react-dnd';
 const DraggableBlock = ({ block }) => {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: 'block',
-    item: () => ({ ...block }), // always return a new copy
+    item: () => ({ ...block }), 
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),

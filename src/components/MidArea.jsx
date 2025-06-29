@@ -3,7 +3,7 @@ import { useDrop } from 'react-dnd';
 import { SpriteContext } from '../contexts/SpriteContext';
 import { v4 as uuidv4 } from 'uuid';
 
-// Recursive Script Block
+
 const ScriptBlock = ({ block, index, parentScript, onUpdate }) => {
   const handleValueChange = (valIndex, newValue) => {
     const updatedScript = [...parentScript];
@@ -45,7 +45,7 @@ const ScriptBlock = ({ block, index, parentScript, onUpdate }) => {
         {renderLabel()}
       </div>
 
-      {/* Nested Drop Area for REPEAT */}
+      
       {block.id === 'REPEAT' && (
         <RepeatDropArea
           nestedBlocks={block.children || []}
@@ -56,7 +56,7 @@ const ScriptBlock = ({ block, index, parentScript, onUpdate }) => {
   );
 };
 
-// Recursive drop area for nested REPEAT blocks
+
 const RepeatDropArea = ({ nestedBlocks, onUpdate }) => {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'block',

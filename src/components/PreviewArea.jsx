@@ -48,14 +48,14 @@ export default function PreviewArea() {
         <button onClick={() => setHeroMode(prev => !prev)} className={`px-4 py-2 rounded-lg ${heroMode ? 'bg-yellow-500 text black' : 'bg-gray-300 text gray-700'}`}> {heroMode ? 'Hero Feature ON' : 'Hero Feature OFF'} </button>
       </div>
 
-      {/* The Stage */}
+      
       <div className="w-full h-3/5 bg-white border border-gray-300 relative">
         {Object.entries(sprites).map(([id, sprite]) => (
           <CatSprite key={id} id={id} sprite={sprite} />
         ))}
       </div>
 
-      {/* Sprite List */}
+      
       <div className="w-full h-2/5 p-2 bg-gray-100 mt-2">
         <h3 className="text-lg font-bold">Sprites</h3>
         <button onClick={handleAddSprite} className="bg-blue-500 text-white px-3 py-1 rounded text-sm my-2">Add Sprite</button>

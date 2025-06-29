@@ -7,7 +7,7 @@ export default function CatSprite({ sprite, id }) {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
 
   const handleMouseDown = (e) => {
-    e.preventDefault(); // Prevent ghost drag outline
+    e.preventDefault(); 
     setDragging(true);
     setOffset({
       x: e.clientX - sprite.x,
@@ -16,10 +16,13 @@ export default function CatSprite({ sprite, id }) {
   };
 
   const handleMouseMove = (e) => {
+
     if (!dragging) return;
     const newX = e.clientX - offset.x;
+
     const newY = e.clientY - offset.y;
     setSprites(prev => ({
+      
       ...prev,
       [id]: {
         ...prev[id],
@@ -37,7 +40,8 @@ export default function CatSprite({ sprite, id }) {
     if (dragging) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
-    } else {
+    } 
+    else {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
     }
@@ -49,7 +53,7 @@ export default function CatSprite({ sprite, id }) {
 
    return (
     <>
-      {/* 🗨️ Show message bubble if there is a message */}
+      
       {sprite.message && (
   <div
     style={{
@@ -57,12 +61,14 @@ export default function CatSprite({ sprite, id }) {
       left: sprite.x,
       top: sprite.y - 40,
       backgroundColor: sprite.isThinking ? '#e2e8f0' : '#fff',
+      
+      
       padding: '6px 12px',
       borderRadius: sprite.isThinking ? '15px' : '8px',
       border: sprite.isThinking ? '1px dotted #718096' : '1px solid #4a5568',
+
       fontSize: '14px',
-      fontStyle: sprite.isThinking ? 'italic' : 'normal',
-      color: '#1a202c',
+      fontStyle: sprite.isThinking ? 'italic' : 'normal', color: '#1a202c',
       whiteSpace: 'nowrap',
       
       zIndex: 10,
@@ -73,11 +79,8 @@ export default function CatSprite({ sprite, id }) {
 )}
 
 
-      {/* 🐱 The sprite image */}
-      <img
-        src={sprite.costume}
-        alt={sprite.name}
-        draggable={false}
+     
+      <img src={sprite.costume} alt={sprite.name} draggable={false}
         onMouseDown={handleMouseDown}
         style={{
           position: 'absolute',
