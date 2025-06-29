@@ -47,20 +47,47 @@ export default function CatSprite({ sprite, id }) {
     };
   }, [dragging]);
 
-  return (
-    <img
-      src={sprite.costume}
-      alt={sprite.name}
-      draggable={false} // Prevent ghost image
-      onMouseDown={handleMouseDown}
-      style={{
-        position: 'absolute',
-        left: sprite.x,
-        top: sprite.y,
-        cursor: 'grab',
-        width: 80,
-        height: 80,
-      }}
-    />
+   return (
+    <>
+      {/* 🗨️ Show message bubble if there is a message */}
+      {sprite.message && (
+  <div
+    style={{
+      position: 'absolute',
+      left: sprite.x,
+      top: sprite.y - 40,
+      backgroundColor: sprite.isThinking ? '#e2e8f0' : '#fff',
+      padding: '6px 12px',
+      borderRadius: sprite.isThinking ? '15px' : '8px',
+      border: sprite.isThinking ? '1px dotted #718096' : '1px solid #4a5568',
+      fontSize: '14px',
+      fontStyle: sprite.isThinking ? 'italic' : 'normal',
+      color: '#1a202c',
+      whiteSpace: 'nowrap',
+      
+      zIndex: 10,
+    }}
+  >
+    {sprite.message}
+  </div>
+)}
+
+
+      {/* 🐱 The sprite image */}
+      <img
+        src={sprite.costume}
+        alt={sprite.name}
+        draggable={false}
+        onMouseDown={handleMouseDown}
+        style={{
+          position: 'absolute',
+          left: sprite.x,
+          top: sprite.y,
+          cursor: 'grab',
+          width: 80,
+          height: 80,
+        }}
+      />
+    </>
   );
 }

@@ -1,11 +1,11 @@
 // Utility to wait for a certain amount of time
-const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Utility for collision detection (Bounding Box)
 const checkCollision = (spriteA, spriteB) => {
-  const rectA = { x: spriteA.x, y: spriteA.y, width: 80, height: 80 }; // Assuming 80x80 sprite
+  const rectA = { x: spriteA.x, y: spriteA.y, width: 80, height: 80 };
   const rectB = { x: spriteB.x, y: spriteB.y, width: 80, height: 80 };
-  
+
   return (
     rectA.x < rectB.x + rectB.width &&
     rectA.x + rectA.width > rectB.x &&
@@ -14,32 +14,36 @@ const checkCollision = (spriteA, spriteB) => {
   );
 };
 
-// The main animation runner
-export default async function runAnimation(spriteId, allSprites, setSprites) {
+// Main animation runner
+export default async function runAnimation(spriteId, allSprites, setSprites, heroMode) {
   let currentSprites = { ...allSprites };
-  const script = currentSprites[spriteId].script;
+  let script = [...currentSprites[spriteId].script]; // clone for safety
+  console.log('heroMode in runAnimation:', heroMode);
 
   const executeBlock = async (block) => {
     switch (block.id) {
-      case 'MOVE': {
+      case 'MOVE Forward': {
         const steps = block.values[0];
         const rad = (currentSprites[spriteId].direction * Math.PI) / 180;
-        const newX = currentSprites[spriteId].x + steps * Math.cos(rad);
-        const newY = currentSprites[spriteId].y + steps * Math.sin(rad);
-        
+        const newX = currentSprites[spriteId].x + steps * Math.sin(rad);
+        const newY = currentSprites[spriteId].y + steps * Math.cos(rad);
+
         currentSprites[spriteId].x = newX;
         currentSprites[spriteId].y = newY;
-        setSprites({ ...currentSprites });
-        await wait(50); // Small delay to see movement
-        break;
-      }
-      case 'TURN_RIGHT': {
-        const degrees = block.values[0];
-        currentSprites[spriteId].direction += degrees;
         setSprites({ ...currentSprites });
         await wait(50);
         break;
       }
+
+      case 'TURN_RIGHT': {
+        console.log(`Turning sprite ${spriteId} right by ${block.values[0]} degrees`);
+        const degrees = block.values[0];
+        currentSprites[spriteId].direction -= degrees;
+        setSprites({ ...currentSprites });
+        await wait(50);
+        break;
+      }
+
       case 'GOTO_XY': {
         currentSprites[spriteId].x = block.values[0];
         currentSprites[spriteId].y = block.values[1];
@@ -47,6 +51,7 @@ export default async function runAnimation(spriteId, allSprites, setSprites) {
         await wait(50);
         break;
       }
+
       case 'SAY_FOR_SECS': {
         const message = block.values[0];
         const duration = block.values[1] * 1000;
@@ -58,6 +63,7 @@ export default async function runAnimation(spriteId, allSprites, setSprites) {
         setSprites({ ...currentSprites });
         break;
       }
+
       case 'THINK_FOR_SECS': {
         const message = block.values[0];
         const duration = block.values[1] * 1000;
@@ -69,56 +75,61 @@ export default async function runAnimation(spriteId, allSprites, setSprites) {
         setSprites({ ...currentSprites });
         break;
       }
+
       case 'REPEAT': {
         const times = block.values[0];
-        // NOTE: This is a simplified repeat. A real implementation
-        // would need to handle nested blocks properly.
-        // For this demo, we'll assume it repeats the *entire* script.
-        // This is a placeholder for a more complex implementation.
-        console.warn("Repeat block is simplified for this demo.");
+        const nestedBlocks = block.children || [];
+        for (let i = 0; i < times; i++) {
+          for (const nestedBlock of nestedBlocks) {
+            const swapped = await executeBlock(nestedBlock);
+            if (swapped) return true;
+          }
+        }
         break;
       }
+
       default:
         break;
     }
-    
-    // HERO FEATURE: Collision Detection and Script Swap
-    for (const otherSpriteId in currentSprites) {
-      if (spriteId !== otherSpriteId) {
-        if (checkCollision(currentSprites[spriteId], currentSprites[otherSpriteId])) {
-          console.log(`Collision detected between ${currentSprites[spriteId].name} and ${currentSprites[otherSpriteId].name}! Swapping scripts.`);
-          const scriptA = currentSprites[spriteId].script;
-          const scriptB = currentSprites[otherSpriteId].script;
 
-          currentSprites[spriteId].script = scriptB;
-          currentSprites[otherSpriteId].script = scriptA;
-          
+    // Collision + Script Swap
+    if (heroMode) {for (const otherId in currentSprites) {
+      if (spriteId !== otherId) {
+        if (checkCollision(currentSprites[spriteId], currentSprites[otherId])) {
+          const spriteA = currentSprites[spriteId];
+          const spriteB = currentSprites[otherId];
+
+          console.log(`Collision detected between ${spriteA.name} and ${spriteB.name}. Swapping scripts.`);
+
+          const tempScript = spriteA.script;
+          spriteA.script = spriteB.script;
+          spriteB.script = tempScript;
+
           setSprites({ ...currentSprites });
 
-          // To prevent immediate re-swapping, we might add a cooldown, but for now this is fine.
-          return true; // Return true to indicate a swap happened
+          return { swappedWith: otherId };
         }
       }
-    }
-    return false; // No swap
+    }}
+
+    return null;
   };
 
-  // Main execution loop
   let keepRunning = true;
-  while(keepRunning) {
-      for (const block of script) {
-          const swapped = await executeBlock(block);
-          if(swapped) {
-            // If scripts were swapped, we stop this sprite's current execution
-            // to let the new script take over on the next 'Play' click.
-            console.log(`${currentSprites[spriteId].name}'s script execution halted due to swap.`);
-            keepRunning = false;
-            break;
-          }
+
+  while (keepRunning) {
+    for (const block of script) {
+      const result = await executeBlock(block);
+      if (result?.swappedWith) {
+        return result;
       }
-      // If we are not repeating, break the loop
-      if (!script.find(b => b.id === 'REPEAT')) {
-        keepRunning = false;
-      }
+    }
+
+    // Stop unless there's a repeat block
+    if (!script.find((b) => b.id === 'REPEAT')) {
+      keepRunning = false;
+    }
   }
+
+  return null;
 }
