@@ -3,20 +3,18 @@ import { useDrop } from 'react-dnd';
 import { SpriteContext } from '../contexts/SpriteContext';
 import { v4 as uuidv4 } from 'uuid';
 
+// Recursive Script Block
 const ScriptBlock = ({ block, index, parentScript, onUpdate }) => {
-  const { sprites, activeSprite } = useContext(SpriteContext);
-  console.log('Rendering ScriptBlock:', block, index, parentScript, onUpdate);
-
   const handleValueChange = (valIndex, newValue) => {
-    const updatedScript = JSON.parse(JSON.stringify(parentScript));
+    const updatedScript = [...parentScript];
     updatedScript[index].values[valIndex] =
       typeof newValue === 'number' ? parseInt(newValue, 10) : newValue;
     onUpdate(updatedScript);
   };
 
-  const handleNestedUpdate = (nestedBlocks) => {
-    const updatedScript = JSON.parse(JSON.stringify(parentScript));
-    updatedScript[index].children = nestedBlocks;
+  const handleNestedUpdate = (updatedChildren) => {
+    const updatedScript = [...parentScript];
+    updatedScript[index].children = updatedChildren;
     onUpdate(updatedScript);
   };
 
@@ -47,7 +45,7 @@ const ScriptBlock = ({ block, index, parentScript, onUpdate }) => {
         {renderLabel()}
       </div>
 
-      {/* If REPEAT block, render nested drop area */}
+      {/* Nested Drop Area for REPEAT */}
       {block.id === 'REPEAT' && (
         <RepeatDropArea
           nestedBlocks={block.children || []}
@@ -58,6 +56,7 @@ const ScriptBlock = ({ block, index, parentScript, onUpdate }) => {
   );
 };
 
+// Recursive drop area for nested REPEAT blocks
 const RepeatDropArea = ({ nestedBlocks, onUpdate }) => {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: 'block',
@@ -66,6 +65,7 @@ const RepeatDropArea = ({ nestedBlocks, onUpdate }) => {
         ...item,
         key: uuidv4(),
         values: [...item.values],
+        children: item.id === 'REPEAT' ? [] : undefined,
       };
       const updated = [...nestedBlocks, newBlock];
       onUpdate(updated);
@@ -96,12 +96,14 @@ const RepeatDropArea = ({ nestedBlocks, onUpdate }) => {
 
 export default function MidArea() {
   const { sprites, setSprites, activeSprite } = useContext(SpriteContext);
-  const activeSpriteScript = sprites[activeSprite]?.script || [];
+  const activeScript = sprites[activeSprite]?.script || [];
 
   const handleMainUpdate = (updatedScript) => {
     const updatedSprites = JSON.parse(JSON.stringify(sprites));
-    updatedSprites[activeSprite].script = updatedScript;
-    setSprites(updatedSprites);
+    if (updatedSprites[activeSprite]) {
+      updatedSprites[activeSprite].script = updatedScript;
+      setSprites(updatedSprites);
+    }
   };
 
   const [{ isOver }, drop] = useDrop(() => ({
@@ -113,13 +115,13 @@ export default function MidArea() {
         values: [...item.values],
         children: item.id === 'REPEAT' ? [] : undefined,
       };
-      const updated = [...activeSpriteScript, newBlock];
+      const updated = [...activeScript, newBlock];
       handleMainUpdate(updated);
     },
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
-  }), [activeSprite, sprites]);
+  }), [activeScript]);
 
   return (
     <div
@@ -129,19 +131,18 @@ export default function MidArea() {
       <h2 className="text-xl font-bold mb-4">
         Script for {sprites[activeSprite]?.name || 'None'}
       </h2>
-      {activeSpriteScript.length === 0 && (
+      {activeScript.length === 0 && (
         <p className="text-gray-400">Drag blocks here</p>
       )}
-      {activeSpriteScript.map((block, index) => {
-                
-        return <ScriptBlock 
+      {activeScript.map((block, index) => (
+        <ScriptBlock
           key={block.key}
           block={block}
           index={index}
-          parentScript={activeSpriteScript}
+          parentScript={activeScript}
           onUpdate={handleMainUpdate}
         />
-})}
+      ))}
     </div>
   );
 }

@@ -27,7 +27,7 @@ export default function Sidebar() {
       <DraggableBlock block={{ id: 'MOVE Forward', label: 'Move Forward __ steps', values: [10] }} />
       <DraggableBlock block={{ id: 'TURN_RIGHT', label: 'Turn ↻ __ degrees', values: [15] }} />
       <DraggableBlock block={{ id: 'GOTO_XY', label: 'Go to x: __ y: __', values: [0, 0] }} />
-      <DraggableBlock block={{ id: 'REPEAT', label: 'REPEAT __ times', values: [10], children:[{ id: 'MOVE Forward', label: 'Move Forward __ steps', values: [10] },{ id: 'TURN_RIGHT', label: 'Turn ↻ __ degrees', values: [15] }] }} />
+      <DraggableBlock block={{ id: 'REPEAT', label: 'REPEAT __ times', values: [10], children:[] }} />
 
       <div className="font-bold mt-6 mb-4">Looks</div>
       <DraggableBlock block={{ id: 'SAY_FOR_SECS', label: 'Say __ for __ secs', values: ['Hello!', 2] }} />
