@@ -41,8 +41,11 @@ export default function PreviewArea() {
   return (
     <div className="flex-none h-full w-full flex flex-col items-center p-2 relative">
       <div className="flex justify-center items-center mb-4">
+        <button onClick={() => window.location.reload()} className="bg-red-500 text-white px-4 py-2 rounded-lg mr-2">Reset</button>
+
         <button onClick={handlePlay} className="bg-green-500 text-white px-4 py-2 rounded-lg mr-2">Play</button>
-        <button onClick={() => setHeroMode(prev => !prev)} className={`px-4 py-2 rounded-lg ${heroMode ? 'bg-yellow-500 text black' : 'bg-gray-300 text gray-700'}`}> {heroMode ? 'Hero Feature' : 'Hero Feature'} </button>
+        
+        <button onClick={() => setHeroMode(prev => !prev)} className={`px-4 py-2 rounded-lg ${heroMode ? 'bg-yellow-500 text black' : 'bg-gray-300 text gray-700'}`}> {heroMode ? 'Hero Feature ON' : 'Hero Feature OFF'} </button>
       </div>
 
       {/* The Stage */}
